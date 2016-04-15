@@ -72,12 +72,18 @@ Thankfully, modern databases support JSON encoded data, and have an explicit JSO
     INSERT INTO test VALUES(3, '[1,3,2]');
 
     -- query the table for all rows where the object attribute contains 1 in its first element
+    -- the previous approach, accessing the array element 0 fails because of the object:
+    -- SELECT object->0 FROM test;
+    -- returns: ERROR:  cannot extract array element from a non-array
+
+    -- the workaround is to use a "path" expression, which returns null:
     -- in this case, the query doesn't throw an error for aid = 2 
-    -- because '{"a":1}'::json->>0 returns null, which can be cast to int. (try it out)
-    SELECT aid FROM test WHERE (object->>0)::int = 1;
+    -- because '{"a":1}'::json#>>'{0}' returns null, which can be cast to int. (try it out)
+    SELECT aid FROM test WHERE (object#>>'{0}')::int = 1;
 
 
 Take a close look at the [PostgreSQL JSON Documentation](http://www.postgresql.org/docs/9.3/static/functions-json.html) to understand the available functions and operators.
+
 
 ### Your Task
 
